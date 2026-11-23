@@ -24,7 +24,7 @@ table{width:100%;border-collapse:collapse;min-width:1400px;font-size:12px}
 th{position:sticky;top:0;background:#eaf0f6;color:#233b55;text-align:left;padding:11px 10px;white-space:nowrap;z-index:1}
 td{padding:10px;border-top:1px solid #e9edf2;vertical-align:top;max-width:260px;white-space:pre-wrap;overflow-wrap:anywhere}
 tbody tr:nth-child(even){background:#fbfcfe}.empty{text-align:center;padding:28px;color:var(--muted)}
-.rowactions{display:flex;gap:5px}.rowactions button{padding:6px 8px;font-size:11px}
+.rowactions{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;min-width:126px;white-space:nowrap}.rowactions button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:54px;white-space:nowrap;word-break:keep-all;padding:7px 10px;font-size:11px;line-height:1.2}td:last-child{min-width:150px}
 .source{display:inline-block;background:#eef3f8;color:#496078;border-radius:4px;padding:3px 6px;font-size:10px}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
 @media(max-width:850px){.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
