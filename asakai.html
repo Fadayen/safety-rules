@@ -68,10 +68,16 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function formData(){return {date:val('date'),moderator:val('moderator'),category:val('category'),content:val('content'),contentJP:val('contentJP'),action:val('action'),actionJP:val('actionJP'),due:val('due'),pic:val('pic'),responsible:val('responsible'),progress:val('progress'),number:val('number')}}
 function clearForm(){$('entryForm').reset();$('date').value=today();$('translationStatus').textContent='Terjemahan Jepang otomatis setelah selesai mengetik.';$('translationStatus').className='translation';editingId=null;$('formTitle').textContent='Input Pembahasan Asakai';$('saveBtn').textContent='Simpan Pembahasan';$('cancelEdit').hidden=true}
 function decodeEntities(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value}
+async function translateIdToJa(text){
+ const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl=id&tl=ja&dt=t&q='+encodeURIComponent(text);
+ const response=await fetch(url);if(!response.ok)throw Error('Translation service unavailable');
+ const data=await response.json();const translated=Array.isArray(data?.[0])?data[0].map(part=>part?.[0]||'').join(''):'';
+ if(!translated.trim())throw Error('Empty translation');return translated;
+}
 async function autoTranslate(){const text=$('content').value.trim(),req=++translationRequest;if(!text){$('translationStatus').textContent='Isi Content ID untuk menerjemahkan.';return}
 if(text.length>450){$('translationStatus').textContent='Teks terlalu panjang untuk sekali terjemah (maksimal 450 karakter).';$('translationStatus').className='translation err';return}
 $('translationStatus').textContent='Sedang menerjemahkan ke Bahasa Jepang...';$('translationStatus').className='translation';
-try{const response=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=id|ja');if(!response.ok)throw Error();const data=await response.json();if(req!==translationRequest)return;const translated=data?.responseData?.translatedText;if(!translated||data.responseStatus!==200)throw Error();$('contentJP').value=decodeEntities(translated);$('translationStatus').textContent='Terjemahan otomatis selesai. Periksa kembali sebelum disimpan.';$('translationStatus').className='translation ok'}
+try{const translated=await translateIdToJa(text);if(req!==translationRequest)return;$('contentJP').value=translated;$('translationStatus').textContent='Terjemahan otomatis selesai. Periksa kembali istilah teknis dan hasilnya sebelum disimpan.';$('translationStatus').className='translation ok'}
 catch(e){if(req!==translationRequest)return;$('translationStatus').textContent='Terjemahan otomatis gagal. Periksa koneksi atau isi Content JP manual.';$('translationStatus').className='translation err'}}
 $('content').addEventListener('input',()=>{clearTimeout(translationTimer);translationRequest++;$('translationStatus').textContent='Menunggu kamu selesai mengetik...';$('translationStatus').className='translation';translationTimer=setTimeout(autoTranslate,1200)});
 
@@ -82,14 +88,10 @@ async function autoTranslateAction(){
  if(text.length>450){$('actionTranslationStatus').textContent='Teks terlalu panjang untuk sekali terjemah (maksimal 450 karakter).';$('actionTranslationStatus').className='translation err';return}
  $('actionTranslationStatus').textContent='Sedang menerjemahkan Countermeasure ke Bahasa Jepang...';$('actionTranslationStatus').className='translation';
  try{
-  const response=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=id|ja');
-  if(!response.ok)throw Error();
-  const data=await response.json();
+  const translated=await translateIdToJa(text);
   if(req!==actionTranslationRequest)return;
-  const translated=data?.responseData?.translatedText;
-  if(!translated||data.responseStatus!==200)throw Error();
-  $('actionJP').value=decodeEntities(translated);
-  $('actionTranslationStatus').textContent='Terjemahan Countermeasure ke Jepang selesai. Periksa kembali sebelum disimpan.';
+  $('actionJP').value=translated;
+  $('actionTranslationStatus').textContent='Terjemahan Countermeasure ke Jepang selesai. Periksa kembali istilah teknis sebelum disimpan.';
   $('actionTranslationStatus').className='translation ok';
  }catch(e){
   if(req!==actionTranslationRequest)return;
